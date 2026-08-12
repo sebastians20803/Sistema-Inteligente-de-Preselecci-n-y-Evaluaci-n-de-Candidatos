@@ -1,0 +1,130 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>Kortex Software — Postúlate</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@500;700&family=IBM+Plex+Sans:wght@400;500;600&family=IBM+Plex+Mono:wght@400;500&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="style.css" />
+</head>
+<body>
+
+<div class="page">
+
+  <!-- PANEL IZQUIERDO: MARCA -->
+  <aside class="brand-panel">
+    <div class="brand-mark">
+      <svg width="40" height="40" viewBox="0 0 40 40" fill="none" xmlns="http://www.w3.org/2000/svg">
+        <path d="M20 1 L37 10.5 V29.5 L20 39 L3 29.5 V10.5 Z" stroke="var(--accent-primary)" stroke-width="1.6"/>
+        <path d="M14 12 V28 M14 20 L26 12 M14 20 L26 28" stroke="var(--text-primary)" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+      </svg>
+      <span class="brand-name">KORTEX</span>
+    </div>
+
+    <div class="brand-copy">
+      <span class="eyebrow">Talento &amp; Ingeniería</span>
+      <h1>Construimos software.<br>Buscamos a quien lo construya.</h1>
+      <p>Cada postulación entra a nuestro proceso de selección automatizado. Un humano de Recursos Humanos revisa cada perfil antes de cualquier decisión — la IA solo prioriza, nunca descarta.</p>
+    </div>
+
+    <ol class="pipeline" aria-label="Etapas del proceso de selección">
+      <li class="pipeline-node" style="--d:0s"><span class="dot"></span><span class="pipeline-label">Postulación recibida</span></li>
+      <li class="pipeline-node" style="--d:0.6s"><span class="dot"></span><span class="pipeline-label">Análisis de perfil</span></li>
+      <li class="pipeline-node" style="--d:1.2s"><span class="dot"></span><span class="pipeline-label">Revisión de RR.HH.</span></li>
+      <li class="pipeline-node" style="--d:1.8s"><span class="dot"></span><span class="pipeline-label">Entrevista</span></li>
+    </ol>
+
+    <div class="brand-footer">TF-2026 · Sistema de preselección TalentFlow AI</div>
+  </aside>
+
+  <!-- PANEL DERECHO: FORMULARIO -->
+  <main class="form-panel">
+    <div class="form-wrap">
+      <span class="eyebrow form-eyebrow">Postulación abierta</span>
+      <h2>Cuéntanos sobre ti</h2>
+      <p class="form-sub">Completa el formulario y adjunta tu hoja de vida en PDF. Te contactaremos por correo o teléfono según el resultado de tu revisión.</p>
+
+      <form id="applicationForm" novalidate>
+
+        <div class="field">
+          <label for="nombre">Nombre completo</label>
+          <input type="text" id="nombre" name="nombre" placeholder="Laura Gómez" required />
+          <span class="field-error" data-for="nombre"></span>
+        </div>
+
+        <div class="field-row">
+          <div class="field">
+            <label for="correo">Correo electrónico</label>
+            <input type="email" id="correo" name="correo" placeholder="laura@correo.com" required />
+            <span class="field-error" data-for="correo"></span>
+          </div>
+          <div class="field">
+            <label for="telefono">Teléfono</label>
+            <input type="tel" id="telefono" name="telefono" placeholder="+57 300 000 0000" required />
+            <span class="field-error" data-for="telefono"></span>
+          </div>
+        </div>
+
+        <div class="field-row">
+          <div class="field">
+            <label for="vacante">Vacante</label>
+            <select id="vacante" name="vacante" required>
+              <option value="" disabled selected>Selecciona una vacante</option>
+              <option value="Desarrollador Backend Junior">Desarrollador Backend Junior</option>
+              <option value="Desarrollador Frontend">Desarrollador Frontend</option>
+              <option value="Analista de Datos">Analista de Datos</option>
+              <option value="DevOps / Ingeniero de Infraestructura">DevOps / Ingeniero de Infraestructura</option>
+              <option value="Desarrollador Full Stack">Desarrollador Full Stack</option>
+            </select>
+            <span class="field-error" data-for="vacante"></span>
+          </div>
+          <div class="field">
+            <label for="experiencia">Años de experiencia</label>
+            <input type="number" id="experiencia" name="experiencia" min="0" max="50" placeholder="2" required />
+            <span class="field-error" data-for="experiencia"></span>
+          </div>
+        </div>
+
+        <div class="field">
+          <label for="tech-input">Tecnologías y herramientas principales</label>
+          <div class="tag-input-wrap">
+            <div class="tag-input" id="tagInput">
+              <input type="text" id="tech-input" placeholder="Busca o escribe una tecnología" autocomplete="off" role="combobox" aria-expanded="false" aria-controls="techSuggestions" aria-autocomplete="list" />
+            </div>
+            <ul class="tech-suggestions" id="techSuggestions" role="listbox" hidden></ul>
+          </div>
+          <span class="field-hint">Ej: Java, Spring Boot, SQL, Git, Docker — o escribe la tuya si no aparece en la lista</span>
+          <span class="field-error" data-for="tecnologias"></span>
+        </div>
+
+        <div class="field">
+          <label for="cv">Hoja de vida (PDF)</label>
+          <label class="file-drop" id="fileDrop" for="cv">
+            <span id="fileDropText">Arrastra tu PDF aquí o haz clic para seleccionarlo</span>
+          </label>
+          <input type="file" id="cv" name="cv" accept="application/pdf" hidden required />
+          <span class="field-error" data-for="cv"></span>
+        </div>
+
+        <label class="checkbox-field">
+          <input type="checkbox" id="consentimiento" name="consentimiento" required />
+          <span>Autorizo el tratamiento de mis datos personales conforme a la política de privacidad de Kortex Software para fines del proceso de selección.</span>
+        </label>
+        <span class="field-error" data-for="consentimiento"></span>
+
+        <button type="submit" id="submitBtn" class="submit-btn">
+          <span id="submitText">Enviar postulación</span>
+        </button>
+
+        <div id="formStatus" class="form-status" role="status" aria-live="polite"></div>
+
+      </form>
+    </div>
+  </main>
+
+</div>
+
+<script src="script.js"></script>
+</body>
+</html>

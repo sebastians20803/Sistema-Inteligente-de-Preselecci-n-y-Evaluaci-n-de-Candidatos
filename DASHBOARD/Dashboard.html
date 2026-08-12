@@ -1,0 +1,61 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>TalentFlow AI — Panel de Selección</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,400;9..144,500;9..144,600&family=IBM+Plex+Sans:wght@400;500;600&family=IBM+Plex+Mono:wght@400;500&display=swap" rel="stylesheet">
+<script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.1/dist/chart.umd.min.js"></script>
+<link rel="stylesheet" href="stylesDashboard.css">
+</head>
+<body>
+
+<div class="wrap">
+
+  <header>
+    <div>
+      <p class="eyebrow">TalentFlow AI · RRHH</p>
+      <h1>Panel de Selección de Candidatos</h1>
+    </div>
+    <div class="status">
+      <div><span class="status-dot" id="statusDot"></span><span id="statusText">Conectando con Sheets…</span></div>
+      <button id="refreshBtn">Actualizar ahora</button>
+    </div>
+  </header>
+
+  <section class="hero" id="heroStats"></section>
+
+  <div class="grid">
+    <div>
+      <div class="panel">
+        <h2>Candidatos por vacante <small id="vacTotal"></small></h2>
+        <div id="vacanteList"></div>
+      </div>
+      <div class="panel">
+        <h2>Postulaciones por fecha</h2>
+        <canvas id="chartFechas" height="90"></canvas>
+      </div>
+    </div>
+
+    <div>
+      <div class="panel">
+        <h2>Distribución de score</h2>
+        <canvas id="chartScore" height="180"></canvas>
+      </div>
+      <div class="panel">
+        <h2>Cola de revisión <small id="pendCount"></small></h2>
+        <div id="pendingQueue"></div>
+      </div>
+    </div>
+  </div>
+
+  <footer>
+    Fuente: Google Sheets API v4 · lectura de solo consulta · actualiza cada <span id="footerInterval"></span>s
+  </footer>
+
+</div>
+
+<script src="scriptdash.js"></script>
+</body>
+</html>

@@ -1,0 +1,393 @@
+:root {
+  --bg-page: #0F171E;
+  --bg-panel: #16212B;
+  --bg-field: #101920;
+  --text-primary: #EDEFF2;
+  --text-muted: #8B98A5;
+  --accent-primary: #E3B23C;
+  --accent-secondary: #4FD1C5;
+  --border: #263340;
+  --danger: #E8664F;
+  --radius: 10px;
+  --font-display: 'Space Grotesk', sans-serif;
+  --font-body: 'IBM Plex Sans', sans-serif;
+  --font-mono: 'IBM Plex Mono', monospace;
+}
+
+* { box-sizing: border-box; }
+
+body {
+  margin: 0;
+  background: var(--bg-page);
+  color: var(--text-primary);
+  font-family: var(--font-body);
+  -webkit-font-smoothing: antialiased;
+}
+
+.page {
+  display: grid;
+  grid-template-columns: 0.85fr 1.15fr;
+  min-height: 100vh;
+}
+
+/* ---------- BRAND PANEL ---------- */
+.brand-panel {
+  background: linear-gradient(180deg, #101A22 0%, #0C1319 100%);
+  border-right: 1px solid var(--border);
+  padding: 48px 44px;
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+  position: sticky;
+  top: 0;
+  height: 100vh;
+}
+
+.brand-mark {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+.brand-name {
+  font-family: var(--font-display);
+  font-weight: 700;
+  font-size: 20px;
+  letter-spacing: 0.06em;
+}
+
+.eyebrow {
+  font-family: var(--font-mono);
+  font-size: 12px;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  color: var(--accent-secondary);
+}
+
+.brand-copy h1 {
+  font-family: var(--font-display);
+  font-weight: 700;
+  font-size: 30px;
+  line-height: 1.25;
+  margin: 14px 0 16px;
+}
+
+.brand-copy p {
+  color: var(--text-muted);
+  font-size: 14.5px;
+  line-height: 1.6;
+  max-width: 34ch;
+}
+
+.pipeline {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  border-left: 1px dashed var(--border);
+  padding-left: 20px;
+  display: flex;
+  flex-direction: column;
+  gap: 22px;
+}
+
+.pipeline-node {
+  position: relative;
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+.pipeline-node .dot {
+  position: absolute;
+  left: -25px;
+  width: 9px;
+  height: 9px;
+  border-radius: 50%;
+  background: var(--accent-primary);
+  box-shadow: 0 0 0 3px rgba(227, 178, 60, 0.15);
+  animation: pulse 2.4s ease-in-out infinite;
+  animation-delay: var(--d);
+}
+
+.pipeline-label {
+  font-family: var(--font-mono);
+  font-size: 13px;
+  color: var(--text-muted);
+}
+
+@keyframes pulse {
+  0%, 100% { transform: scale(1); background: var(--accent-primary); }
+  50% { transform: scale(1.6); background: var(--accent-secondary); }
+}
+
+.brand-footer {
+  font-family: var(--font-mono);
+  font-size: 11.5px;
+  color: var(--text-muted);
+  letter-spacing: 0.04em;
+}
+
+/* ---------- FORM PANEL ---------- */
+.form-panel {
+  padding: 56px 48px 60px;
+  display: flex;
+  justify-content: center;
+}
+
+.form-wrap {
+  width: 100%;
+  max-width: 520px;
+}
+
+.form-eyebrow { display: block; margin-bottom: 12px; }
+
+.form-panel h2 {
+  font-family: var(--font-display);
+  font-weight: 700;
+  font-size: 28px;
+  margin: 0 0 8px;
+}
+
+.form-sub {
+  color: var(--text-muted);
+  font-size: 14.5px;
+  line-height: 1.55;
+  margin: 0 0 32px;
+}
+
+form { display: flex; flex-direction: column; gap: 20px; }
+
+.field-row {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 16px;
+}
+
+.field { display: flex; flex-direction: column; gap: 6px; }
+
+label {
+  font-size: 13px;
+  font-weight: 500;
+  color: var(--text-primary);
+}
+
+input[type="text"],
+input[type="email"],
+input[type="tel"],
+input[type="number"],
+select {
+  background: var(--bg-field);
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  padding: 11px 13px;
+  color: var(--text-primary);
+  font-family: var(--font-body);
+  font-size: 14.5px;
+  outline: none;
+  transition: border-color 0.15s ease;
+  width: 100%;
+}
+
+input::placeholder { color: #56636E; }
+
+input:focus, select:focus, .tag-input:focus-within, .file-drop:focus-within {
+  border-color: var(--accent-primary);
+}
+
+select {
+  appearance: none;
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='8'%3E%3Cpath d='M1 1l5 5 5-5' stroke='%238B98A5' stroke-width='1.5' fill='none'/%3E%3C/svg%3E");
+  background-repeat: no-repeat;
+  background-position: right 14px center;
+}
+
+.field-hint {
+  font-size: 12px;
+  color: var(--text-muted);
+}
+
+.field-error {
+  font-size: 12px;
+  color: var(--danger);
+  min-height: 14px;
+}
+
+/* Tag input for technologies */
+.tag-input-wrap {
+  position: relative;
+}
+
+.tag-input {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  background: var(--bg-field);
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  padding: 9px 10px;
+}
+
+.tag-chip {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  background: rgba(79, 209, 197, 0.12);
+  color: var(--accent-secondary);
+  border: 1px solid rgba(79, 209, 197, 0.3);
+  border-radius: 999px;
+  padding: 4px 10px;
+  font-family: var(--font-mono);
+  font-size: 12.5px;
+}
+
+.tag-chip button {
+  background: none;
+  border: none;
+  color: inherit;
+  cursor: pointer;
+  font-size: 13px;
+  line-height: 1;
+  padding: 0;
+}
+
+.tag-input input {
+  flex: 1;
+  min-width: 160px;
+  border: none;
+  background: transparent;
+  outline: none;
+  color: var(--text-primary);
+  font-size: 14px;
+  padding: 4px 2px;
+}
+
+/* Dropdown de sugerencias de tecnologías */
+.tech-suggestions {
+  position: absolute;
+  top: calc(100% + 6px);
+  left: 0;
+  right: 0;
+  z-index: 20;
+  margin: 0;
+  padding: 6px;
+  list-style: none;
+  background: var(--bg-panel);
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  box-shadow: 0 12px 28px rgba(0, 0, 0, 0.35);
+  max-height: 240px;
+  overflow-y: auto;
+}
+
+.tech-suggestions[hidden] { display: none; }
+
+.tech-suggestions li {
+  padding: 9px 11px;
+  border-radius: 6px;
+  font-size: 13.5px;
+  color: var(--text-primary);
+  cursor: pointer;
+}
+
+.tech-suggestions li mark {
+  background: none;
+  color: var(--accent-primary);
+  font-weight: 600;
+}
+
+.tech-suggestions li.active,
+.tech-suggestions li:hover {
+  background: rgba(227, 178, 60, 0.12);
+}
+
+/* File drop */
+.file-drop {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  text-align: center;
+  border: 1px dashed var(--border);
+  border-radius: var(--radius);
+  background: var(--bg-field);
+  padding: 22px 14px;
+  cursor: pointer;
+  font-size: 13.5px;
+  color: var(--text-muted);
+  transition: border-color 0.15s ease, color 0.15s ease;
+}
+
+.file-drop.has-file {
+  border-color: var(--accent-secondary);
+  color: var(--accent-secondary);
+  border-style: solid;
+}
+
+.file-drop.drag-over {
+  border-color: var(--accent-primary);
+  color: var(--accent-primary);
+}
+
+/* Checkbox */
+.checkbox-field {
+  display: flex;
+  align-items: flex-start;
+  gap: 10px;
+  font-size: 13px;
+  color: var(--text-muted);
+  line-height: 1.5;
+  cursor: pointer;
+}
+
+.checkbox-field input {
+  margin-top: 3px;
+  accent-color: var(--accent-primary);
+  width: 15px;
+  height: 15px;
+  flex-shrink: 0;
+}
+
+/* Submit */
+.submit-btn {
+  margin-top: 6px;
+  background: var(--accent-primary);
+  color: #14100A;
+  border: none;
+  border-radius: var(--radius);
+  padding: 13px 20px;
+  font-family: var(--font-display);
+  font-weight: 700;
+  font-size: 15px;
+  cursor: pointer;
+  transition: filter 0.15s ease, transform 0.1s ease;
+}
+
+.submit-btn:hover { filter: brightness(1.08); }
+.submit-btn:active { transform: scale(0.99); }
+.submit-btn:disabled { opacity: 0.6; cursor: not-allowed; }
+
+.form-status {
+  font-size: 13.5px;
+  min-height: 18px;
+}
+
+.form-status.success { color: var(--accent-secondary); }
+.form-status.error { color: var(--danger); }
+
+/* Focus visibility */
+button:focus-visible, input:focus-visible, select:focus-visible, label.file-drop:focus-visible {
+  outline: 2px solid var(--accent-secondary);
+  outline-offset: 2px;
+}
+
+/* Reduced motion */
+@media (prefers-reduced-motion: reduce) {
+  .pipeline-node .dot { animation: none; }
+}
+
+/* Responsive */
+@media (max-width: 900px) {
+  .page { grid-template-columns: 1fr; }
+  .brand-panel { position: relative; height: auto; padding: 36px 28px; }
+  .form-panel { padding: 40px 24px 60px; }
+  .field-row { grid-template-columns: 1fr; }
+}

@@ -1,0 +1,233 @@
+/* ============================================================
+     CONFIGURACIÓN — edita solo esta parte al conectar tu Sheet
+     ============================================================ */
+
+  :root{
+    --bg-base:#10151f;
+    --bg-panel:#1a2233;
+    --bg-panel-raised:#222b40;
+    --line:#2c3650;
+    --text-primary:#ece7de;
+    --text-muted:#8792a6;
+    --gold:#c89b4a;
+    --alta:#6fa287;
+    --media:#c89b4a;
+    --baja:#a8543f;
+    --font-display:'Fraunces', serif;
+    --font-body:'IBM Plex Sans', sans-serif;
+    --font-mono:'IBM Plex Mono', monospace;
+  }
+
+  *{box-sizing:border-box;}
+  html,body{margin:0;padding:0;}
+  body{
+    background:var(--bg-base);
+    color:var(--text-primary);
+    font-family:var(--font-body);
+    -webkit-font-smoothing:antialiased;
+    padding:32px 24px 80px;
+    min-height:100vh;
+  }
+  a{color:inherit;}
+
+  .wrap{max-width:1180px;margin:0 auto;}
+
+  /* ---------- header ---------- */
+  header{
+    display:flex;
+    flex-wrap:wrap;
+    justify-content:space-between;
+    align-items:flex-end;
+    gap:24px;
+    border-bottom:1px solid var(--line);
+    padding-bottom:24px;
+    margin-bottom:32px;
+  }
+  .eyebrow{
+    font-family:var(--font-mono);
+    font-size:11px;
+    letter-spacing:.14em;
+    text-transform:uppercase;
+    color:var(--gold);
+    margin:0 0 8px;
+  }
+  h1{
+    font-family:var(--font-display);
+    font-weight:500;
+    font-size:34px;
+    margin:0;
+    letter-spacing:-.01em;
+  }
+  .status{
+    font-family:var(--font-mono);
+    font-size:12px;
+    color:var(--text-muted);
+    text-align:right;
+    display:flex;
+    flex-direction:column;
+    gap:6px;
+    align-items:flex-end;
+  }
+  .status-dot{
+    display:inline-block;width:7px;height:7px;border-radius:50%;
+    background:var(--alta);margin-right:6px;
+    box-shadow:0 0 0 3px rgba(111,162,135,.15);
+  }
+  #refreshBtn{
+    font-family:var(--font-mono);
+    font-size:11px;
+    background:none;
+    border:1px solid var(--line);
+    color:var(--text-muted);
+    padding:5px 10px;
+    border-radius:3px;
+    cursor:pointer;
+  }
+  #refreshBtn:hover{border-color:var(--gold);color:var(--gold);}
+
+  /* ---------- hero stats ---------- */
+  .hero{
+    display:grid;
+    grid-template-columns:1.4fr repeat(4, 1fr);
+    gap:1px;
+    background:var(--line);
+    border:1px solid var(--line);
+    border-radius:6px;
+    overflow:hidden;
+    margin-bottom:36px;
+  }
+  .hero-cell{
+    background:var(--bg-panel);
+    padding:22px 20px;
+  }
+  .hero-cell.big{
+    background:var(--bg-panel-raised);
+  }
+  .hero-num{
+    font-family:var(--font-display);
+    font-size:44px;
+    line-height:1;
+    margin:0 0 6px;
+  }
+  .hero-cell.big .hero-num{font-size:56px;color:var(--gold);}
+  .hero-label{
+    font-size:12px;
+    color:var(--text-muted);
+    letter-spacing:.02em;
+  }
+  .hero-empty{color:var(--text-muted);font-family:var(--font-mono);font-size:20px;}
+
+  /* ---------- section layout ---------- */
+  .grid{
+    display:grid;
+    grid-template-columns:1.6fr 1fr;
+    gap:24px;
+  }
+  @media (max-width:860px){ .grid{grid-template-columns:1fr;} }
+
+  .panel{
+    background:var(--bg-panel);
+    border:1px solid var(--line);
+    border-radius:6px;
+    padding:22px 22px 20px;
+    margin-bottom:24px;
+  }
+  .panel h2{
+    font-family:var(--font-display);
+    font-weight:500;
+    font-size:18px;
+    margin:0 0 18px;
+    display:flex;
+    justify-content:space-between;
+    align-items:baseline;
+  }
+  .panel h2 small{
+    font-family:var(--font-mono);
+    font-size:11px;
+    color:var(--text-muted);
+    text-transform:none;
+    letter-spacing:0;
+  }
+
+  /* ---------- vacante bars ---------- */
+  .vac-row{margin-bottom:14px;}
+  .vac-row:last-child{margin-bottom:0;}
+  .vac-top{
+    display:flex;justify-content:space-between;
+    font-size:13px;margin-bottom:6px;
+  }
+  .vac-name{color:var(--text-primary);}
+  .vac-count{font-family:var(--font-mono);color:var(--text-muted);}
+  .vac-track{
+    height:6px;background:var(--bg-panel-raised);
+    border-radius:3px;overflow:hidden;
+  }
+  .vac-fill{
+    height:100%;background:var(--gold);
+    border-radius:3px;
+    transition:width .5s ease;
+  }
+
+  /* ---------- charts ---------- */
+  canvas{max-width:100%;}
+
+  /* ---------- ticket queue (signature element) ---------- */
+  .ticket{
+    position:relative;
+    background:var(--bg-panel-raised);
+    border:1px solid var(--line);
+    border-radius:4px;
+    padding:14px 16px 14px 14px;
+    margin-bottom:12px;
+    display:flex;
+    align-items:center;
+    gap:14px;
+  }
+  .ticket:last-child{margin-bottom:0;}
+  .stamp{
+    flex:0 0 auto;
+    width:46px;height:46px;
+    border-radius:50%;
+    display:flex;align-items:center;justify-content:center;
+    font-family:var(--font-mono);
+    font-weight:500;
+    font-size:14px;
+    border:2px solid currentColor;
+    box-shadow:0 0 0 2px var(--bg-panel-raised), 0 0 0 3px currentColor;
+    transform:rotate(-6deg);
+    letter-spacing:-.02em;
+  }
+  .stamp.alta{color:var(--alta);}
+  .stamp.media{color:var(--media);}
+  .stamp.baja{color:var(--baja);}
+  .ticket-body{flex:1;min-width:0;}
+  .ticket-name{font-size:14px;margin:0 0 3px;}
+  .ticket-meta{
+    font-family:var(--font-mono);
+    font-size:11px;
+    color:var(--text-muted);
+    overflow:hidden;text-overflow:ellipsis;white-space:nowrap;
+  }
+  .ticket-id{
+    font-family:var(--font-mono);
+    font-size:11px;
+    color:var(--gold);
+  }
+
+  .empty-state{
+    font-family:var(--font-mono);
+    font-size:12px;
+    color:var(--text-muted);
+    line-height:1.6;
+    padding:12px 0;
+  }
+  .empty-state b{color:var(--text-primary);}
+
+  footer{
+    max-width:1180px;margin:40px auto 0;
+    font-family:var(--font-mono);
+    font-size:11px;
+    color:var(--text-muted);
+    border-top:1px solid var(--line);
+    padding-top:16px;
+  }
