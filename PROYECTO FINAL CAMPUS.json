@@ -1,0 +1,2100 @@
+{
+  "name": "PRUEBA PROYECTO FINAL CAMPUS",
+  "nodes": [
+    {
+      "parameters": {
+        "httpMethod": "POST",
+        "path": "62c792b5-294e-4760-a292-2cc7835e01da",
+        "responseMode": "responseNode",
+        "options": {
+          "allowedOrigins": "*",
+          "binaryPropertyName": "cv"
+        }
+      },
+      "type": "n8n-nodes-base.webhook",
+      "typeVersion": 2.1,
+      "position": [
+        -256,
+        -32
+      ],
+      "id": "f54b3916-5ec0-4bca-b510-bcb5e72bfead",
+      "name": "Webhook",
+      "webhookId": "62c792b5-294e-4760-a292-2cc7835e01da"
+    },
+    {
+      "parameters": {
+        "operation": "pdf",
+        "binaryPropertyName": "={{ $json.cv0 }}",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.extractFromFile",
+      "typeVersion": 1.1,
+      "position": [
+        848,
+        -128
+      ],
+      "id": "1f659496-93ac-426b-811f-7460f20e317e",
+      "name": "Extract from File"
+    },
+    {
+      "parameters": {
+        "modelId": {
+          "__rl": true,
+          "value": "models/gemini-flash-lite-latest",
+          "mode": "list",
+          "cachedResultName": "models/gemini-flash-lite-latest"
+        },
+        "messages": {
+          "values": [
+            {
+              "content": "=Vacante a la que aplica: {{ $('Normalizar').item.json.Vacante }}\n\nRequisitos de la vacante: {{ $json.requisitos_texto }}\n\nTecnologías que el candidato declaró conocer (autoreportado en el formulario): {{ $('Normalizar').item.json.Tecnologias }}\n\nTexto extraído de la hoja de vida:\n{{ $json.text || $json.pages[0].markdown }}"
+            }
+          ]
+        },
+        "jsonOutput": true,
+        "builtInTools": {},
+        "options": {
+          "systemMessage": "Eres un analista de Recursos Humanos. Analiza el texto de una hoja de vida junto con los requisitos de la vacante, y responde ÚNICAMENTE con un JSON válido, sin texto adicional, sin markdown, con esta estructura exacta:\n\n{\n  \"experiencia_anios\": number,\n  \"habilidades\": string[],\n  \"nivel_educativo\": string,\n  \"compatibilidad\": number,\n  \"observaciones\": string,\n\n  \"preguntas_sugeridas\": string[]\n}\n\nInstrucciones para \"compatibilidad\":\n- Es un puntaje de 0 a 100 que representa qué tan bien cumple el candidato los requisitos técnicos y de experiencia de la vacante.\n- Basa el puntaje en la proporción de tecnologías requeridas que el candidato domina, y en si su experiencia alcanza el mínimo solicitado.\n- No uses como criterio género, edad, nacionalidad, religión, estado civil, discapacidad ni ninguna otra característica personal no relacionada con competencias técnicas.\n\nInstrucciones para \"observaciones\":\n- Máximo 2 frases, mencionando qué requisitos cumple y cuáles le faltan.\n- Compara las tecnologías que el candidato declaró en el formulario contra lo que realmente aparece evidenciado en el texto del CV. Si hay tecnologías declaradas que NO se encuentran respaldadas en el CV, menciónalo brevemente.\n\nInstrucciones para \"preguntas_sugeridas\":\n- Genera exactamente 2 preguntas técnicas breves para la entrevista, basadas en tecnologías o experiencia que el candidato menciona en su CV.\n- El objetivo es que RRHH pueda validar en la entrevista si el candidato realmente domina lo que declaró.\n- No generes preguntas sobre tecnologías que el candidato NO mencionó.\n\nNo inventes información que no esté en el CV. Si un dato no aparece, indícalo como null o como arreglo vacío según corresponda."
+        }
+      },
+      "type": "@n8n/n8n-nodes-langchain.googleGemini",
+      "typeVersion": 1.2,
+      "position": [
+        1760,
+        -128
+      ],
+      "id": "1bee25b9-f934-468b-81c8-ab104a322a58",
+      "name": "Message a model",
+      "credentials": {
+        "googlePalmApi": {
+          "id": "jglCbw0Z5DZbTcL2",
+          "name": "Google Gemini(PaLM) Api account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "assignments": {
+          "assignments": [
+            {
+              "id": "97833c28-427d-436e-9289-a33e7c951a3f",
+              "name": "Score_ia",
+              "value": "={{ $json.compatibilidad }}",
+              "type": "number"
+            },
+            {
+              "id": "de6c39e9-455f-4616-bb60-19299aa92e43",
+              "name": "Observaciones",
+              "value": "={{ $json.observaciones }}",
+              "type": "string"
+            }
+          ]
+        },
+        "includeOtherFields": true,
+        "options": {}
+      },
+      "type": "n8n-nodes-base.set",
+      "typeVersion": 3.5,
+      "position": [
+        2336,
+        -128
+      ],
+      "id": "6f325745-313e-4830-a00c-08e8f474608a",
+      "name": "Lectura de la IA"
+    },
+    {
+      "parameters": {
+        "assignments": {
+          "assignments": [
+            {
+              "id": "342171fb-55c8-4f43-8bc7-414420381f62",
+              "name": "Prioridad",
+              "value": "Recomendado para revisión prioritaria",
+              "type": "string"
+            },
+            {
+              "id": "8e7e9c57-d901-4ed0-a0bd-9318835d6f37",
+              "name": "estado",
+              "value": "REVISION_PRIORITARIA",
+              "type": "string"
+            }
+          ]
+        },
+        "includeOtherFields": true,
+        "options": {}
+      },
+      "type": "n8n-nodes-base.set",
+      "typeVersion": 3.5,
+      "position": [
+        2784,
+        -320
+      ],
+      "id": "0feaf02a-15fb-4646-8f19-4579ef57aed8",
+      "name": "Compatibilidad Alta"
+    },
+    {
+      "parameters": {
+        "assignments": {
+          "assignments": [
+            {
+              "id": "4b726338-c60d-4f19-b2aa-f2fb0cccaf63",
+              "name": "estado",
+              "value": "REVISION_MANUAL",
+              "type": "string"
+            }
+          ]
+        },
+        "includeOtherFields": true,
+        "options": {}
+      },
+      "type": "n8n-nodes-base.set",
+      "typeVersion": 3.5,
+      "position": [
+        2784,
+        -128
+      ],
+      "id": "3ecbd016-0136-4177-a15f-7a819750b5c8",
+      "name": "Compatibilidad Media"
+    },
+    {
+      "parameters": {
+        "assignments": {
+          "assignments": [
+            {
+              "id": "b00e4238-de44-4d8d-b7f6-71e529300225",
+              "name": "Prioridad",
+              "value": "Revision Secundaria",
+              "type": "string"
+            },
+            {
+              "id": "44618c36-857e-4d92-933f-4f6a820bfe95",
+              "name": "estado",
+              "value": "PENDIENTE_REVISION",
+              "type": "string"
+            }
+          ]
+        },
+        "includeOtherFields": true,
+        "options": {}
+      },
+      "type": "n8n-nodes-base.set",
+      "typeVersion": 3.5,
+      "position": [
+        2784,
+        64
+      ],
+      "id": "7c5eb0de-00e5-41d7-8d1d-fef77f503dc1",
+      "name": "Compatibilidad Baja"
+    },
+    {
+      "parameters": {
+        "operation": "append",
+        "documentId": {
+          "__rl": true,
+          "value": "15RaLJXQQVScoHlA3nbpNBHHt_HYXXsP1sMUkeoH9VKk",
+          "mode": "list",
+          "cachedResultName": "PROYECTO N8N",
+          "cachedResultUrl": "https://docs.google.com/spreadsheets/d/15RaLJXQQVScoHlA3nbpNBHHt_HYXXsP1sMUkeoH9VKk/edit?usp=drivesdk"
+        },
+        "sheetName": {
+          "__rl": true,
+          "value": "gid=0",
+          "mode": "list",
+          "cachedResultName": "Sheet1",
+          "cachedResultUrl": "https://docs.google.com/spreadsheets/d/15RaLJXQQVScoHlA3nbpNBHHt_HYXXsP1sMUkeoH9VKk/edit#gid=0"
+        },
+        "columns": {
+          "mappingMode": "defineBelow",
+          "value": {
+            "id_candidato": "={{ $('Normalizar').item.json.Ticket }}",
+            "nombre": "={{ $('Normalizar').item.json.Nombre }}",
+            "correo": "={{ $('Normalizar').item.json.Correo }}",
+            "telefono": "={{ $('Normalizar').item.json.Telefono }}",
+            "vacante": "={{ $('Normalizar').item.json.Vacante }}",
+            "experiencia": "={{ $('Normalizar').item.json['exp_años'] }}",
+            "habilidades": "={{ $('Leer JSON de IA').item.json.habilidades .join(', ') }}",
+            "nivel educativo": "={{ $('Leer JSON de IA').item.json.nivel_educativo }}",
+            "score_compatibilidad": "={{ $('Leer JSON de IA').item.json.compatibilidad }}",
+            "estado": "={{ $json.estado }}",
+            "observacion_ia": "={{ $json.Observaciones }}",
+            "fecha_postulacion": "={{ $('Normalizar').item.json.Fech }}",
+            "tecnologias_declaradas": "={{ $('Normalizar').item.json.Tecnologias }}",
+            "preguntas_sugeridas": "={{ $('Lectura de la IA').item.json.preguntas_sugeridas.join(' | ') }}"
+          },
+          "matchingColumns": [],
+          "schema": [
+            {
+              "id": "id_candidato",
+              "displayName": "id_candidato",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": false
+            },
+            {
+              "id": "nombre",
+              "displayName": "nombre",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": false
+            },
+            {
+              "id": "correo",
+              "displayName": "correo",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": false
+            },
+            {
+              "id": "telefono",
+              "displayName": "telefono",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": false
+            },
+            {
+              "id": "vacante",
+              "displayName": "vacante",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": false
+            },
+            {
+              "id": "experiencia",
+              "displayName": "experiencia",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": false
+            },
+            {
+              "id": "habilidades",
+              "displayName": "habilidades",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": false
+            },
+            {
+              "id": "nivel educativo",
+              "displayName": "nivel educativo",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": false
+            },
+            {
+              "id": "score_compatibilidad",
+              "displayName": "score_compatibilidad",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": false
+            },
+            {
+              "id": "estado",
+              "displayName": "estado",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": false
+            },
+            {
+              "id": "fecha_postulacion",
+              "displayName": "fecha_postulacion",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": false
+            },
+            {
+              "id": "observacion_ia",
+              "displayName": "observacion_ia",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": false
+            },
+            {
+              "id": "tecnologias_declaradas",
+              "displayName": "tecnologias_declaradas",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": false
+            },
+            {
+              "id": "preguntas_sugeridas",
+              "displayName": "preguntas_sugeridas",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": false
+            },
+            {
+              "id": "revision_rrhh",
+              "displayName": "revision_rrhh",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": false
+            }
+          ],
+          "attemptToConvertTypes": false,
+          "convertFieldsToString": false
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.googleSheets",
+      "typeVersion": 4.7,
+      "position": [
+        3008,
+        -224
+      ],
+      "id": "1fff029a-16a5-46e2-a92b-69edf84c76bd",
+      "name": "Append row in sheet",
+      "credentials": {
+        "googleSheetsOAuth2Api": {
+          "id": "w5emZlBifYqgTQqG",
+          "name": "Google Sheets account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "sendTo": "sebastiancampus20803@gmail.com",
+        "subject": "=Aplicacion para Vacante — {{ $json.vacante }} : {{ $json.nombre }}",
+        "message": "=<div style=\"font-family: 'Segoe UI', Arial, sans-serif; max-width: 480px; margin: 0 auto; background: #10151f; border-radius: 10px; overflow: hidden; border: 1px solid #2c3650;\">\n\n  <div style=\"background: #1a2233; padding: 20px 28px; border-bottom: 1px solid #2c3650;\">\n    <p style=\"margin: 0; font-size: 11px; letter-spacing: 1px; text-transform: uppercase; color: #c89b4a; font-weight: 600;\">TalentFlow AI · RRHH</p>\n    <h2 style=\"margin: 6px 0 0; font-size: 18px; color: #ece7de;\">Nueva candidatura analizada</h2>\n  </div>\n\n  <div style=\"padding: 24px 28px;\">\n    <table style=\"width: 100%; border-collapse: collapse; font-size: 14px; color: #ece7de;\">\n      <tr>\n        <td style=\"padding: 8px 0; color: #8792a6;\">Candidato</td>\n        <td style=\"padding: 8px 0; text-align: right; font-weight: 600;\">{{ $json.nombre }}</td>\n      </tr>\n      <tr style=\"border-top: 1px solid #2c3650;\">\n        <td style=\"padding: 8px 0; color: #8792a6;\">Vacante</td>\n        <td style=\"padding: 8px 0; text-align: right;\">{{ $json.vacante }}</td>\n      </tr>\n      <tr style=\"border-top: 1px solid #2c3650;\">\n        <td style=\"padding: 8px 0; color: #8792a6;\">Compatibilidad</td>\n        <td style=\"padding: 8px 0; text-align: right;\">\n          <span style=\"background: rgba(200,155,74,0.15); color: #c89b4a; padding: 3px 10px; border-radius: 999px; font-weight: 600; font-size: 13px;\">\n            {{ $json.score_compatibilidad }}%\n          </span>\n        </td>\n      </tr>\n    </table>\n  </div>\n\n  <div style=\"padding: 14px 28px; background: #1a2233; border-top: 1px solid #2c3650;\">\n    <p style=\"margin: 0; font-size: 12px; color: #8792a6;\">Revisa el perfil completo en el panel de selección para continuar el proceso.</p>\n  </div>\n\n</div>",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.gmail",
+      "typeVersion": 2.2,
+      "position": [
+        3232,
+        -224
+      ],
+      "id": "63b87a98-3453-4114-9763-44fc20a05f38",
+      "name": "Send a message",
+      "webhookId": "6ffc514f-a8dd-46ab-bc93-52afdb147f1e",
+      "credentials": {
+        "gmailOAuth2": {
+          "id": "oFAwAC9oAf9QppmW",
+          "name": "Gmail account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "assignments": {
+          "assignments": [
+            {
+              "id": "b4cdbf39-9eed-43de-93f6-afee216525f6",
+              "name": "ticket",
+              "value": "={{ $json.message.text .replace(\"/candidato\", \"\").trim(); }}",
+              "type": "string"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.set",
+      "typeVersion": 3.5,
+      "position": [
+        192,
+        384
+      ],
+      "id": "495c8923-bd78-4097-b437-c34b8d650241",
+      "name": "Quitar /candidato"
+    },
+    {
+      "parameters": {
+        "documentId": {
+          "__rl": true,
+          "value": "15RaLJXQQVScoHlA3nbpNBHHt_HYXXsP1sMUkeoH9VKk",
+          "mode": "list",
+          "cachedResultName": "PROYECTO N8N",
+          "cachedResultUrl": "https://docs.google.com/spreadsheets/d/15RaLJXQQVScoHlA3nbpNBHHt_HYXXsP1sMUkeoH9VKk/edit?usp=drivesdk"
+        },
+        "sheetName": {
+          "__rl": true,
+          "value": "gid=0",
+          "mode": "list",
+          "cachedResultName": "Sheet1",
+          "cachedResultUrl": "https://docs.google.com/spreadsheets/d/15RaLJXQQVScoHlA3nbpNBHHt_HYXXsP1sMUkeoH9VKk/edit#gid=0"
+        },
+        "filtersUI": {
+          "values": [
+            {
+              "lookupColumn": "id_candidato",
+              "lookupValue": "={{ $json.ticket }}"
+            }
+          ]
+        },
+        "combineFilters": "OR",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.googleSheets",
+      "typeVersion": 4.7,
+      "position": [
+        416,
+        384
+      ],
+      "id": "5c3a09eb-5a89-4a48-a872-0206ef46512e",
+      "name": "Get row(s) in sheet",
+      "alwaysOutputData": true,
+      "credentials": {
+        "googleSheetsOAuth2Api": {
+          "id": "w5emZlBifYqgTQqG",
+          "name": "Google Sheets account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "chatId": "8452875879",
+        "text": "=Nombre:  {{ $json.nombre }}\nCorreo:{{ $json.correo }}\nTelefono:{{ $json.telefono }}\nVacante:{{ $json.vacante }}\nAños Experiencia: {{ $json.experiencia }}\nHabilidades: {{ $json.habilidades }}\nNivel educativo:{{ $json['nivel educativo'] }}\nScore: {{ $json.score_compatibilidad }}\nEstado:{{ $json.estado }}\nObservacion IA: {{ $json.observacion_ia }}",
+        "additionalFields": {}
+      },
+      "type": "n8n-nodes-base.telegram",
+      "typeVersion": 1.2,
+      "position": [
+        864,
+        480
+      ],
+      "id": "4093b5b0-9b36-49e2-ae15-36d18e1ab250",
+      "name": "Mensaje Candidato especifico",
+      "webhookId": "25cb1061-a0db-4c80-b4ca-c96b8e9261f9",
+      "credentials": {
+        "telegramApi": {
+          "id": "K2n7GL7xINeywM40",
+          "name": "Telegram account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "rules": {
+          "values": [
+            {
+              "conditions": {
+                "options": {
+                  "caseSensitive": true,
+                  "leftValue": "",
+                  "typeValidation": "strict",
+                  "version": 3
+                },
+                "conditions": [
+                  {
+                    "leftValue": "={{ $json.Score_ia }}",
+                    "rightValue": 80,
+                    "operator": {
+                      "type": "number",
+                      "operation": "gte"
+                    },
+                    "id": "fdb5a057-4ad0-4eb0-a19d-88f109c534a8"
+                  }
+                ],
+                "combinator": "and"
+              },
+              "renameOutput": true,
+              "outputKey": "Compatibilidad Alta"
+            },
+            {
+              "conditions": {
+                "options": {
+                  "caseSensitive": true,
+                  "leftValue": "",
+                  "typeValidation": "strict",
+                  "version": 3
+                },
+                "conditions": [
+                  {
+                    "id": "107f5f21-00d6-4978-91e9-946052aa0c3e",
+                    "leftValue": "={{ $json.Score_ia }}",
+                    "rightValue": 60,
+                    "operator": {
+                      "type": "number",
+                      "operation": "gte"
+                    }
+                  }
+                ],
+                "combinator": "and"
+              },
+              "renameOutput": true,
+              "outputKey": "Compatibilidad Media"
+            },
+            {
+              "conditions": {
+                "options": {
+                  "caseSensitive": true,
+                  "leftValue": "",
+                  "typeValidation": "strict",
+                  "version": 3
+                },
+                "conditions": [
+                  {
+                    "id": "f005bfcb-84bc-40dc-9882-4fee4d336045",
+                    "leftValue": "={{ $json.Score_ia }}",
+                    "rightValue": 60,
+                    "operator": {
+                      "type": "number",
+                      "operation": "lt"
+                    }
+                  }
+                ],
+                "combinator": "and"
+              },
+              "renameOutput": true,
+              "outputKey": "Compatibilidad Baja"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.switch",
+      "typeVersion": 3.4,
+      "position": [
+        2560,
+        -144
+      ],
+      "id": "e386bc51-ebb2-44a7-a896-70f8a6279d4d",
+      "name": "Ordenar dependiendo Score"
+    },
+    {
+      "parameters": {
+        "rules": {
+          "values": [
+            {
+              "conditions": {
+                "options": {
+                  "caseSensitive": true,
+                  "leftValue": "",
+                  "typeValidation": "strict",
+                  "version": 3
+                },
+                "conditions": [
+                  {
+                    "leftValue": "={{ $json.message.text }}",
+                    "rightValue": "/candidato",
+                    "operator": {
+                      "type": "string",
+                      "operation": "startsWith"
+                    },
+                    "id": "2a6751cf-b759-4ce9-bb00-10e5942c971c"
+                  }
+                ],
+                "combinator": "and"
+              },
+              "renameOutput": true,
+              "outputKey": "candidato"
+            },
+            {
+              "conditions": {
+                "options": {
+                  "caseSensitive": true,
+                  "leftValue": "",
+                  "typeValidation": "strict",
+                  "version": 3
+                },
+                "conditions": [
+                  {
+                    "id": "341c5d23-45f7-4afe-ae36-32d566f3ae20",
+                    "leftValue": "={{ $json.message.text }}",
+                    "rightValue": "/pendientes 1",
+                    "operator": {
+                      "type": "string",
+                      "operation": "equals",
+                      "name": "filter.operator.equals"
+                    }
+                  }
+                ],
+                "combinator": "and"
+              },
+              "renameOutput": true,
+              "outputKey": "PRIORITARIA"
+            },
+            {
+              "conditions": {
+                "options": {
+                  "caseSensitive": true,
+                  "leftValue": "",
+                  "typeValidation": "strict",
+                  "version": 3
+                },
+                "conditions": [
+                  {
+                    "id": "b1ad3783-ffac-4b10-992b-a61e25663e3e",
+                    "leftValue": "={{ $json.message.text }}",
+                    "rightValue": "/pendientes 2",
+                    "operator": {
+                      "type": "string",
+                      "operation": "equals",
+                      "name": "filter.operator.equals"
+                    }
+                  }
+                ],
+                "combinator": "and"
+              },
+              "renameOutput": true,
+              "outputKey": "MANUAL"
+            },
+            {
+              "conditions": {
+                "options": {
+                  "caseSensitive": true,
+                  "leftValue": "",
+                  "typeValidation": "strict",
+                  "version": 3
+                },
+                "conditions": [
+                  {
+                    "id": "07291d64-5150-48b4-a639-312f63a5bf60",
+                    "leftValue": "={{ $json.message.text }}",
+                    "rightValue": "/pendientes 3",
+                    "operator": {
+                      "type": "string",
+                      "operation": "equals",
+                      "name": "filter.operator.equals"
+                    }
+                  }
+                ],
+                "combinator": "and"
+              },
+              "renameOutput": true,
+              "outputKey": "PENDIENTE REVISION"
+            }
+          ]
+        },
+        "options": {
+          "fallbackOutput": "extra"
+        }
+      },
+      "type": "n8n-nodes-base.switch",
+      "typeVersion": 3.4,
+      "position": [
+        -32,
+        720
+      ],
+      "id": "868ad7d5-e556-4bf7-9131-0249821fef1b",
+      "name": "Seccionar mensaje"
+    },
+    {
+      "parameters": {
+        "chatId": "8452875879",
+        "text": "=Nueva candidatura analizada \nCandidato: {{ $('Normalizar').item.json.Nombre }}\nVacante: {{ $('Normalizar').item.json.Vacante }} \nCompatibilidad: {{ $('Append row in sheet').item.json.score_compatibilidad }}  %\n{{ $('Append row in sheet').item.json.estado }}",
+        "additionalFields": {}
+      },
+      "type": "n8n-nodes-base.telegram",
+      "typeVersion": 1.2,
+      "position": [
+        3456,
+        -224
+      ],
+      "id": "8442ac57-8478-4f6f-9035-3c56ef51f490",
+      "name": "Send a text message",
+      "webhookId": "349ee4a4-27bd-4f60-868f-b1a431301cca",
+      "credentials": {
+        "telegramApi": {
+          "id": "K2n7GL7xINeywM40",
+          "name": "Telegram account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "chatId": "8452875879",
+        "text": "=Comando no valido. Intenta Nuevamente con /candidato (ticket) or /pendientes 1 - 2 o 3",
+        "additionalFields": {}
+      },
+      "type": "n8n-nodes-base.telegram",
+      "typeVersion": 1.2,
+      "position": [
+        192,
+        1152
+      ],
+      "id": "56a39c20-4070-422c-9278-f10cd4349c6b",
+      "name": "Enviar Fallback",
+      "webhookId": "25cb1061-a0db-4c80-b4ca-c96b8e9261f9",
+      "credentials": {
+        "telegramApi": {
+          "id": "K2n7GL7xINeywM40",
+          "name": "Telegram account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "jsCode": "// Tomar la respuesta cruda de la IA (ajusta el nombre de campo según tu output real)\nconst rawResponse = $input.first().json.content.parts[0].text\n\nlet analisisIA;\nif (typeof rawResponse === \"object\") {\n  analisisIA = rawResponse;\n} else {\n  let texto = String(rawResponse).trim();\n  texto = texto.replace(/^```json\\s*/i, \"\").replace(/```$/, \"\").trim();\n  try {\n    analisisIA = JSON.parse(texto);\n  } catch (err) {\n    return [{\n      json: {\n        ...$json,\n        error_parseo: true,\n        mensaje_error: \"No se pudo interpretar la respuesta de la IA como JSON.\",\n        respuesta_cruda: texto\n      }\n    }];\n  }\n}\n\nreturn [{\n  json: {\n    ...$json,\n    experiencia_anios: analisisIA.experiencia_anios,\n    habilidades: analisisIA.habilidades,\n    nivel_educativo: analisisIA.nivel_educativo,\n    compatibilidad: analisisIA.compatibilidad,\n    observaciones: analisisIA.observaciones,\n    preguntas_sugeridas: analisisIA.preguntas_sugeridas\n  }\n}];"
+      },
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        2112,
+        -144
+      ],
+      "id": "4e85462b-97e8-4f62-b8a9-633c73b7d5c1",
+      "name": "Leer JSON de IA"
+    },
+    {
+      "parameters": {
+        "conditions": {
+          "options": {
+            "caseSensitive": true,
+            "leftValue": "",
+            "typeValidation": "strict",
+            "version": 3
+          },
+          "conditions": [
+            {
+              "id": "23d8d831-da67-4047-9f48-23ab52dcdbb4",
+              "leftValue": "={{ $json.nombre }}",
+              "rightValue": 0,
+              "operator": {
+                "type": "string",
+                "operation": "empty",
+                "singleValue": true
+              }
+            }
+          ],
+          "combinator": "and"
+        },
+        "options": {
+          "ignoreCase": false
+        }
+      },
+      "type": "n8n-nodes-base.if",
+      "typeVersion": 2.3,
+      "position": [
+        640,
+        384
+      ],
+      "id": "8898d213-caac-487b-81c6-a2b680e599c1",
+      "name": "If2"
+    },
+    {
+      "parameters": {
+        "chatId": "8452875879",
+        "text": "=No encontré ningún candidato con ese ticket. Verifica el ID e intenta de nuevo",
+        "additionalFields": {}
+      },
+      "type": "n8n-nodes-base.telegram",
+      "typeVersion": 1.2,
+      "position": [
+        864,
+        288
+      ],
+      "id": "f24cb00a-9ada-436f-a099-ef0a1bca187d",
+      "name": "Enviar Fallback1",
+      "webhookId": "25cb1061-a0db-4c80-b4ca-c96b8e9261f9",
+      "credentials": {
+        "telegramApi": {
+          "id": "K2n7GL7xINeywM40",
+          "name": "Telegram account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "respondWith": "json",
+        "responseBody": "={\n  \"success\": false,\n  \"error\": \"correo_duplicado\",\n  \"message\": \"Este correo ya está registrado. Debes intentar nuevamente con otro correo.\"\n}",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.respondToWebhook",
+      "typeVersion": 1.5,
+      "position": [
+        608,
+        64
+      ],
+      "id": "21dc7221-c1d4-4279-902b-8f2dc84c20ec",
+      "name": "Respond to Webhook"
+    },
+    {
+      "parameters": {
+        "documentId": {
+          "__rl": true,
+          "value": "15RaLJXQQVScoHlA3nbpNBHHt_HYXXsP1sMUkeoH9VKk",
+          "mode": "list",
+          "cachedResultName": "PROYECTO N8N",
+          "cachedResultUrl": "https://docs.google.com/spreadsheets/d/15RaLJXQQVScoHlA3nbpNBHHt_HYXXsP1sMUkeoH9VKk/edit?usp=drivesdk"
+        },
+        "sheetName": {
+          "__rl": true,
+          "value": "gid=0",
+          "mode": "list",
+          "cachedResultName": "Sheet1",
+          "cachedResultUrl": "https://docs.google.com/spreadsheets/d/15RaLJXQQVScoHlA3nbpNBHHt_HYXXsP1sMUkeoH9VKk/edit#gid=0"
+        },
+        "filtersUI": {
+          "values": [
+            {
+              "lookupColumn": "correo",
+              "lookupValue": "={{$json.Correo.trim().toLowerCase() }}"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.googleSheets",
+      "typeVersion": 4.7,
+      "position": [
+        192,
+        -32
+      ],
+      "id": "95d3d646-6604-45be-9bd8-7e6d2e87b259",
+      "name": "Verificar correo",
+      "alwaysOutputData": true,
+      "credentials": {
+        "googleSheetsOAuth2Api": {
+          "id": "w5emZlBifYqgTQqG",
+          "name": "Google Sheets account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "jsCode": "const requisitos = {\n  \"Desarrollador Backend Junior\": {\n    tecnologias: [\"Java\", \"Spring Boot\", \"SQL\", \"Git\", \"REST API\"],\n    experiencia_minima: 1,\n\n    nivel_educativo_minimo: \"Técnico\"\n  },\n  \"Desarrollador Frontend\": {\n    tecnologias: [\"HTML\", \"CSS\", \"JavaScript\", \"React\", \"Git\"],\n    experiencia_minima: 1,\n    nivel_educativo_minimo: \"Técnico\"\n  },\n  \"Analista de Datos\": {\n    tecnologias: [\"SQL\", \"Power BI\", \"Excel avanzado\", \"Python\"],\n    experiencia_minima: 2,\n    nivel_educativo_minimo: \"Profesional\"\n  },\n  \"DevOps / Ingeniero de Infraestructura\": {\n    tecnologias: [\"Docker\", \"AWS\", \"Linux\", \"CI/CD\", \"Git\"],\n    experiencia_minima: 2,\n    nivel_educativo_minimo: \"Técnico\"\n  },\n  \"Desarrollador Full Stack\": {\n    tecnologias: [\"JavaScript\", \"Node.js\", \"React\", \"SQL\", \"Git\", \"REST API\"],\n    experiencia_minima: 3,\n    nivel_educativo_minimo: \"Profesional\"\n  }\n};\n\nconst vacante = $('Normalizar').first().json.Vacante;\nconst req = requisitos[vacante];\n\nreturn {\n  json: {\n    ...$json,\n    requisitos_texto: req\n      ? `Tecnologías requeridas: ${req.tecnologias.join(\", \")}. Experiencia mínima: ${req.experiencia_minima} año(s). Nivel educativo mínimo: ${req.nivel_educativo_minimo}.`\n      : \"Vacante no encontrada en el catálogo de requisitos.\"\n  }\n};"
+      },
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        1536,
+        -128
+      ],
+      "id": "c0be6aad-2da7-4083-aa19-9b4967655c33",
+      "name": "Requerimiento Vacantes"
+    },
+    {
+      "parameters": {
+        "binaryProperty": "={{ $('Extraer PDF').item.json.cv0 }}",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.mistralAi",
+      "typeVersion": 1,
+      "position": [
+        1312,
+        -272
+      ],
+      "id": "f3c95915-0556-4a03-b5c7-4d099fc369fe",
+      "name": "Extract text OCR",
+      "credentials": {
+        "mistralCloudApi": {
+          "id": "xnQd3yh2MhPX9RGR",
+          "name": "Mistral Cloud account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "conditions": {
+          "options": {
+            "caseSensitive": true,
+            "leftValue": "",
+            "typeValidation": "strict",
+            "version": 3
+          },
+          "conditions": [
+            {
+              "id": "763d19f1-cbf4-4523-9164-5da6ec9dd1ae",
+              "leftValue": "={{ $json.text }}",
+              "rightValue": "",
+              "operator": {
+                "type": "string",
+                "operation": "empty",
+                "singleValue": true
+              }
+            }
+          ],
+          "combinator": "and"
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.if",
+      "typeVersion": 2.3,
+      "position": [
+        1088,
+        -128
+      ],
+      "id": "3bfdaa74-7ff5-46ad-9b78-ea73f58ddca7",
+      "name": "Verificar PDF"
+    },
+    {
+      "parameters": {
+        "jsCode": "\n\nreturn $('Normalizar').item.binary"
+      },
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        624,
+        -128
+      ],
+      "id": "74a15f8b-398a-4704-a058-a18a4c731c2c",
+      "name": "Extraer PDF"
+    },
+    {
+      "parameters": {
+        "conditions": {
+          "options": {
+            "caseSensitive": true,
+            "leftValue": "",
+            "typeValidation": "strict",
+            "version": 3
+          },
+          "conditions": [
+            {
+              "id": "23d8d831-da67-4047-9f48-23ab52dcdbb4",
+              "leftValue": "={{ $json.nombre }}",
+              "rightValue": 0,
+              "operator": {
+                "type": "string",
+                "operation": "empty",
+                "singleValue": true
+              }
+            }
+          ],
+          "combinator": "and"
+        },
+        "options": {
+          "ignoreCase": false
+        }
+      },
+      "type": "n8n-nodes-base.if",
+      "typeVersion": 2.3,
+      "position": [
+        416,
+        -32
+      ],
+      "id": "b47f0fb8-be5b-4c3e-8ce0-49c62fa11c21",
+      "name": "Correo ya registrado?"
+    },
+    {
+      "parameters": {
+        "assignments": {
+          "assignments": [
+            {
+              "id": "8a9d4bff-1f30-464b-9945-80bd8f056765",
+              "name": "Ticket",
+              "value": "=Ticket-{{ $now.toFormat('yyyyMMdd') }}-{{ $execution.id }}",
+              "type": "string"
+            },
+            {
+              "id": "94b4c059-5862-430c-935d-5293b91a5eaf",
+              "name": "Nombre",
+              "value": "={{ $json.body.nombre.trim().toLowerCase().split(' ').map(palabra => palabra.charAt(0).toUpperCase()+palabra.slice(1)) .join(\" \") }}",
+              "type": "string"
+            },
+            {
+              "id": "2bd3aabe-d204-42ef-a035-6fc8e4c53026",
+              "name": "Correo",
+              "value": "={{ $json.body.correo .trim().toLowerCase() }}",
+              "type": "string"
+            },
+            {
+              "id": "420c1c36-5354-4856-abda-05092d57ffee",
+              "name": "Telefono",
+              "value": "={{ $json.body.telefono }}",
+              "type": "string"
+            },
+            {
+              "id": "a74a5e96-5bfe-46e8-8779-3540e75bb7fe",
+              "name": "Vacante",
+              "value": "={{ $json.body.vacante }}",
+              "type": "string"
+            },
+            {
+              "id": "a556874a-f217-4766-99c5-d9340753204d",
+              "name": "exp_años",
+              "value": "={{ $json.body.experiencia_anios }}",
+              "type": "string"
+            },
+            {
+              "id": "67ccfaee-0a07-4a89-9f5c-a569baa3692d",
+              "name": "Tecnologias",
+              "value": "={{ $json.body.tecnologias }}",
+              "type": "string"
+            },
+            {
+              "id": "453bbc10-c70a-4994-9ba5-1dbea3971603",
+              "name": "Consentimiento",
+              "value": "={{ $json.body.consentimiento }}",
+              "type": "string"
+            },
+            {
+              "id": "acc59913-23eb-41f1-a171-2d01025192b7",
+              "name": "Fech",
+              "value": "={{ $json.body.fecha_postulacion }}",
+              "type": "string"
+            }
+          ]
+        },
+        "includeOtherFields": true,
+        "include": "selected",
+        "includeFields": "cv0",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.set",
+      "typeVersion": 3.5,
+      "position": [
+        -32,
+        -32
+      ],
+      "id": "12d46aa9-6181-42f0-aa93-e05e07abdfb1",
+      "name": "Normalizar"
+    },
+    {
+      "parameters": {
+        "chatId": "8452875879",
+        "text": "={{ $json.mensaje }}",
+        "additionalFields": {}
+      },
+      "type": "n8n-nodes-base.telegram",
+      "typeVersion": 1.2,
+      "position": [
+        640,
+        576
+      ],
+      "id": "a81f68e2-3d94-46a1-83f5-ac83e48d458a",
+      "name": "Mensaje pendientes REVISION_PRIORITARIA",
+      "webhookId": "25cb1061-a0db-4c80-b4ca-c96b8e9261f9",
+      "credentials": {
+        "telegramApi": {
+          "id": "K2n7GL7xINeywM40",
+          "name": "Telegram account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "chatId": "8452875879",
+        "text": "={{ $json.mensaje }}",
+        "additionalFields": {}
+      },
+      "type": "n8n-nodes-base.telegram",
+      "typeVersion": 1.2,
+      "position": [
+        640,
+        768
+      ],
+      "id": "4f531019-d8d3-4254-8466-90e3ac8f5ab3",
+      "name": "Mensaje pendientes REVISION_MANUAL",
+      "webhookId": "25cb1061-a0db-4c80-b4ca-c96b8e9261f9",
+      "credentials": {
+        "telegramApi": {
+          "id": "K2n7GL7xINeywM40",
+          "name": "Telegram account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "chatId": "8452875879",
+        "text": "={{ $json.mensaje }}",
+        "additionalFields": {}
+      },
+      "type": "n8n-nodes-base.telegram",
+      "typeVersion": 1.2,
+      "position": [
+        640,
+        960
+      ],
+      "id": "c888be1d-5dfe-4fe3-a4cf-0b0eb6088fd4",
+      "name": "Mensaje pendientes PENDIENTE_REVISION",
+      "webhookId": "25cb1061-a0db-4c80-b4ca-c96b8e9261f9",
+      "credentials": {
+        "telegramApi": {
+          "id": "K2n7GL7xINeywM40",
+          "name": "Telegram account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "jsCode": "// Modo: Run Once for All Items\n\nconst items = $input.all();\n\nif (items.length === 0) {\n  return [{\n    json: {\n      mensaje: \"No hay candidatos pendientes de revisión en este momento.\"\n    }\n  }];\n}\n\nlet mensaje = `📋 Candidatos pendientes de revisión (${items.length})\\n\\n`;\n\nitems.forEach((item, index) => {\n  const c = item.json;\n  mensaje += `${index + 1}. ${c.nombre || \"Sin nombre\"}\\n`;\n  mensaje += `   ID: ${c.id_candidato || \"N/A\"}\\n`;\n  mensaje += `   Vacante: ${c.vacante || \"N/A\"}\\n`;\n  mensaje += `   Compatibilidad: ${c.score_compatibilidad || \"N/A\"}%\\n\\n`;\n});\n\nreturn [{\n  json: {\n    mensaje: mensaje.trim()\n  }\n}];"
+      },
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        416,
+        960
+      ],
+      "id": "97e2dcb3-f150-4730-9256-a421e77ce02e",
+      "name": "Loop de candidatos extraidos en el sheets"
+    },
+    {
+      "parameters": {
+        "jsCode": "// Modo: Run Once for All Items\n\nconst items = $input.all();\n\nif (items.length === 0) {\n  return [{\n    json: {\n      mensaje: \"No hay candidatos pendientes de revisión en este momento.\"\n    }\n  }];\n}\n\nlet mensaje = `📋 Candidatos pendientes de revisión (${items.length})\\n\\n`;\n\nitems.forEach((item, index) => {\n  const c = item.json;\n  mensaje += `${index + 1}. ${c.nombre || \"Sin nombre\"}\\n`;\n  mensaje += `   ID: ${c.id_candidato || \"N/A\"}\\n`;\n  mensaje += `   Vacante: ${c.vacante || \"N/A\"}\\n`;\n  mensaje += `   Compatibilidad: ${c.score_compatibilidad || \"N/A\"}%\\n\\n`;\n});\n\nreturn [{\n  json: {\n    mensaje: mensaje.trim()\n  }\n}];"
+      },
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        416,
+        576
+      ],
+      "id": "d15dfd17-614a-48a0-9b70-0451bc252f6b",
+      "name": "Loop de candidatos extraidos en el sheets1"
+    },
+    {
+      "parameters": {
+        "jsCode": "// Modo: Run Once for All Items\n\nconst items = $input.all();\n\nif (items.length === 0) {\n  return [{\n    json: {\n      mensaje: \"No hay candidatos pendientes de revisión en este momento.\"\n    }\n  }];\n}\n\nlet mensaje = `📋 Candidatos pendientes de revisión (${items.length})\\n\\n`;\n\nitems.forEach((item, index) => {\n  const c = item.json;\n  mensaje += `${index + 1}. ${c.nombre || \"Sin nombre\"}\\n`;\n  mensaje += `   ID: ${c.id_candidato || \"N/A\"}\\n`;\n  mensaje += `   Vacante: ${c.vacante || \"N/A\"}\\n`;\n  mensaje += `   Compatibilidad: ${c.score_compatibilidad || \"N/A\"}%\\n\\n`;\n});\n\nreturn [{\n  json: {\n    mensaje: mensaje.trim()\n  }\n}];"
+      },
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        416,
+        768
+      ],
+      "id": "5995a4c3-fdcb-4426-a8d7-d217c7f5f8eb",
+      "name": "Loop de candidatos extraidos en el sheets2"
+    },
+    {
+      "parameters": {
+        "documentId": {
+          "__rl": true,
+          "value": "15RaLJXQQVScoHlA3nbpNBHHt_HYXXsP1sMUkeoH9VKk",
+          "mode": "list",
+          "cachedResultName": "PROYECTO N8N",
+          "cachedResultUrl": "https://docs.google.com/spreadsheets/d/15RaLJXQQVScoHlA3nbpNBHHt_HYXXsP1sMUkeoH9VKk/edit?usp=drivesdk"
+        },
+        "sheetName": {
+          "__rl": true,
+          "value": "gid=0",
+          "mode": "list",
+          "cachedResultName": "Sheet1",
+          "cachedResultUrl": "https://docs.google.com/spreadsheets/d/15RaLJXQQVScoHlA3nbpNBHHt_HYXXsP1sMUkeoH9VKk/edit#gid=0"
+        },
+        "filtersUI": {
+          "values": [
+            {
+              "lookupColumn": "estado",
+              "lookupValue": "=PENDIENTE_REVISION"
+            }
+          ]
+        },
+        "combineFilters": "OR",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.googleSheets",
+      "typeVersion": 4.7,
+      "position": [
+        192,
+        960
+      ],
+      "id": "2c09e9e3-1070-48a9-bedc-7a9274294af1",
+      "name": "Buscar candidatos faltantes3",
+      "credentials": {
+        "googleSheetsOAuth2Api": {
+          "id": "w5emZlBifYqgTQqG",
+          "name": "Google Sheets account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "documentId": {
+          "__rl": true,
+          "value": "15RaLJXQQVScoHlA3nbpNBHHt_HYXXsP1sMUkeoH9VKk",
+          "mode": "list",
+          "cachedResultName": "PROYECTO N8N",
+          "cachedResultUrl": "https://docs.google.com/spreadsheets/d/15RaLJXQQVScoHlA3nbpNBHHt_HYXXsP1sMUkeoH9VKk/edit?usp=drivesdk"
+        },
+        "sheetName": {
+          "__rl": true,
+          "value": "gid=0",
+          "mode": "list",
+          "cachedResultName": "Sheet1",
+          "cachedResultUrl": "https://docs.google.com/spreadsheets/d/15RaLJXQQVScoHlA3nbpNBHHt_HYXXsP1sMUkeoH9VKk/edit#gid=0"
+        },
+        "filtersUI": {
+          "values": [
+            {
+              "lookupColumn": "estado",
+              "lookupValue": "=REVISION_PRIORITARIA"
+            }
+          ]
+        },
+        "combineFilters": "OR",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.googleSheets",
+      "typeVersion": 4.7,
+      "position": [
+        192,
+        576
+      ],
+      "id": "0e880f4e-b5fc-45d4-80b1-501f27b5af74",
+      "name": "Buscar candidatos faltantes1",
+      "credentials": {
+        "googleSheetsOAuth2Api": {
+          "id": "w5emZlBifYqgTQqG",
+          "name": "Google Sheets account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "documentId": {
+          "__rl": true,
+          "value": "15RaLJXQQVScoHlA3nbpNBHHt_HYXXsP1sMUkeoH9VKk",
+          "mode": "list",
+          "cachedResultName": "PROYECTO N8N",
+          "cachedResultUrl": "https://docs.google.com/spreadsheets/d/15RaLJXQQVScoHlA3nbpNBHHt_HYXXsP1sMUkeoH9VKk/edit?usp=drivesdk"
+        },
+        "sheetName": {
+          "__rl": true,
+          "value": "gid=0",
+          "mode": "list",
+          "cachedResultName": "Sheet1",
+          "cachedResultUrl": "https://docs.google.com/spreadsheets/d/15RaLJXQQVScoHlA3nbpNBHHt_HYXXsP1sMUkeoH9VKk/edit#gid=0"
+        },
+        "filtersUI": {
+          "values": [
+            {
+              "lookupColumn": "estado",
+              "lookupValue": "=REVISION_MANUAL"
+            }
+          ]
+        },
+        "combineFilters": "OR",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.googleSheets",
+      "typeVersion": 4.7,
+      "position": [
+        192,
+        768
+      ],
+      "id": "458cb269-91cc-42a2-942c-90cc6ba2cb5e",
+      "name": "Buscar candidatos faltantes2",
+      "credentials": {
+        "googleSheetsOAuth2Api": {
+          "id": "w5emZlBifYqgTQqG",
+          "name": "Google Sheets account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "updates": [
+          "message"
+        ],
+        "additionalFields": {}
+      },
+      "type": "n8n-nodes-base.telegramTrigger",
+      "typeVersion": 1.5,
+      "position": [
+        -256,
+        768
+      ],
+      "id": "6560bd61-16f2-487d-9b05-18c22d482c30",
+      "name": "Recibir mensaje de telegram",
+      "webhookId": "9283e7cb-cfb6-4e45-b414-a7751ca315d5",
+      "credentials": {
+        "telegramApi": {
+          "id": "K2n7GL7xINeywM40",
+          "name": "Telegram account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "operation": "update",
+        "documentId": {
+          "__rl": true,
+          "value": "15RaLJXQQVScoHlA3nbpNBHHt_HYXXsP1sMUkeoH9VKk",
+          "mode": "list",
+          "cachedResultName": "PROYECTO N8N",
+          "cachedResultUrl": "https://docs.google.com/spreadsheets/d/15RaLJXQQVScoHlA3nbpNBHHt_HYXXsP1sMUkeoH9VKk/edit?usp=drivesdk"
+        },
+        "sheetName": {
+          "__rl": true,
+          "value": "gid=0",
+          "mode": "list",
+          "cachedResultName": "Sheet1",
+          "cachedResultUrl": "https://docs.google.com/spreadsheets/d/15RaLJXQQVScoHlA3nbpNBHHt_HYXXsP1sMUkeoH9VKk/edit#gid=0"
+        },
+        "columns": {
+          "mappingMode": "defineBelow",
+          "value": {
+            "id_candidato": "={{ $json.body.id_candidato }}",
+            "estado": "={{ $json.body.nuevo_estado }}"
+          },
+          "matchingColumns": [
+            "id_candidato"
+          ],
+          "schema": [
+            {
+              "id": "id_candidato",
+              "displayName": "id_candidato",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": false
+            },
+            {
+              "id": "nombre",
+              "displayName": "nombre",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": true
+            },
+            {
+              "id": "correo",
+              "displayName": "correo",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": true
+            },
+            {
+              "id": "telefono",
+              "displayName": "telefono",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": true
+            },
+            {
+              "id": "vacante",
+              "displayName": "vacante",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": true
+            },
+            {
+              "id": "experiencia",
+              "displayName": "experiencia",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": true
+            },
+            {
+              "id": "habilidades",
+              "displayName": "habilidades",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": true
+            },
+            {
+              "id": "nivel educativo",
+              "displayName": "nivel educativo",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": true
+            },
+            {
+              "id": "score_compatibilidad",
+              "displayName": "score_compatibilidad",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": true
+            },
+            {
+              "id": "estado",
+              "displayName": "estado",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": false
+            },
+            {
+              "id": "fecha_postulacion",
+              "displayName": "fecha_postulacion",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": true
+            },
+            {
+              "id": "observacion_ia",
+              "displayName": "observacion_ia",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": true
+            },
+            {
+              "id": "tecnologias_declaradas",
+              "displayName": "tecnologias_declaradas",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": true
+            },
+            {
+              "id": "preguntas_sugeridas",
+              "displayName": "preguntas_sugeridas",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": true
+            },
+            {
+              "id": "revision_rrhh",
+              "displayName": "revision_rrhh",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": true
+            },
+            {
+              "id": "row_number",
+              "displayName": "row_number",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "number",
+              "canBeUsedToMatch": true,
+              "readOnly": true,
+              "removed": true
+            }
+          ],
+          "attemptToConvertTypes": false,
+          "convertFieldsToString": false
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.googleSheets",
+      "typeVersion": 4.7,
+      "position": [
+        1520,
+        576
+      ],
+      "id": "4b921159-06d1-43b7-a708-b4790394afe8",
+      "name": "Update row in sheet",
+      "credentials": {
+        "googleSheetsOAuth2Api": {
+          "id": "w5emZlBifYqgTQqG",
+          "name": "Google Sheets account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "conditions": {
+          "options": {
+            "caseSensitive": true,
+            "leftValue": "",
+            "typeValidation": "strict",
+            "version": 3
+          },
+          "conditions": [
+            {
+              "id": "3b7de68c-6bcb-4107-b5dc-1d3926db5ab8",
+              "leftValue": "={{ $json.id_candidato }}",
+              "rightValue": "",
+              "operator": {
+                "type": "string",
+                "operation": "notEmpty",
+                "singleValue": true
+              }
+            }
+          ],
+          "combinator": "and"
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.if",
+      "typeVersion": 2.3,
+      "position": [
+        1744,
+        576
+      ],
+      "id": "94847c80-2d31-433e-8584-64dd9a06673d",
+      "name": "If"
+    },
+    {
+      "parameters": {
+        "respondWith": "json",
+        "responseBody": "{ \"success\": true, \"id_candidato\": \"{{ $json.id_candidato }}\", \"estado\": \"{{ $json.estado }}\" }",
+        "options": {
+          "responseCode": 200
+        }
+      },
+      "type": "n8n-nodes-base.respondToWebhook",
+      "typeVersion": 1.5,
+      "position": [
+        1952,
+        480
+      ],
+      "id": "bf14bd15-17f6-47b0-a4ba-53400c4bfe08",
+      "name": "si encontró"
+    },
+    {
+      "parameters": {
+        "respondWith": "json",
+        "responseBody": "{ \"success\": false, \"error\": \"No se encontró el candidato con ese ticket\" }",
+        "options": {
+          "responseCode": 404
+        }
+      },
+      "type": "n8n-nodes-base.respondToWebhook",
+      "typeVersion": 1.5,
+      "position": [
+        1952,
+        640
+      ],
+      "id": "dfb9320a-8fe5-4dae-993e-35a44108cb64",
+      "name": "no encontró"
+    },
+    {
+      "parameters": {
+        "httpMethod": "POST",
+        "path": "55df4b75-293c-4fe9-9c65-2402732f8cc8",
+        "responseMode": "responseNode",
+        "options": {
+          "allowedOrigins": "*"
+        }
+      },
+      "type": "n8n-nodes-base.webhook",
+      "typeVersion": 2.1,
+      "position": [
+        1344,
+        576
+      ],
+      "id": "7034afbb-49c7-4809-9d10-00bc0a262ce4",
+      "name": "Actualizar estados sheets",
+      "webhookId": "55df4b75-293c-4fe9-9c65-2402732f8cc8"
+    },
+    {
+      "parameters": {
+        "respondWith": "json",
+        "responseBody": "{\n  \"success\": true,\n  \"id_candidato\": \"{{ $('Normalizar').item.json.Ticket }}\",\n  \"mensaje\": \"Postulación recibida correctamente\"\n}",
+        "options": {
+          "responseCode": 200
+        }
+      },
+      "type": "n8n-nodes-base.respondToWebhook",
+      "typeVersion": 1.5,
+      "position": [
+        3680,
+        -224
+      ],
+      "id": "9b6fe53f-395b-4e3b-9578-1df9db81d5c2",
+      "name": "Respond OK - Postulacion"
+    }
+  ],
+  "pinData": {},
+  "connections": {
+    "Webhook": {
+      "main": [
+        [
+          {
+            "node": "Normalizar",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Extract from File": {
+      "main": [
+        [
+          {
+            "node": "Verificar PDF",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Message a model": {
+      "main": [
+        [
+          {
+            "node": "Leer JSON de IA",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Lectura de la IA": {
+      "main": [
+        [
+          {
+            "node": "Ordenar dependiendo Score",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Compatibilidad Media": {
+      "main": [
+        [
+          {
+            "node": "Append row in sheet",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Append row in sheet": {
+      "main": [
+        [
+          {
+            "node": "Send a message",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Send a message": {
+      "main": [
+        [
+          {
+            "node": "Send a text message",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Compatibilidad Baja": {
+      "main": [
+        [
+          {
+            "node": "Append row in sheet",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Compatibilidad Alta": {
+      "main": [
+        [
+          {
+            "node": "Append row in sheet",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Quitar /candidato": {
+      "main": [
+        [
+          {
+            "node": "Get row(s) in sheet",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Get row(s) in sheet": {
+      "main": [
+        [
+          {
+            "node": "If2",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Ordenar dependiendo Score": {
+      "main": [
+        [
+          {
+            "node": "Compatibilidad Alta",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "Compatibilidad Media",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "Compatibilidad Baja",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Seccionar mensaje": {
+      "main": [
+        [
+          {
+            "node": "Quitar /candidato",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "Buscar candidatos faltantes1",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "Buscar candidatos faltantes2",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "Buscar candidatos faltantes3",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "Enviar Fallback",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Leer JSON de IA": {
+      "main": [
+        [
+          {
+            "node": "Lectura de la IA",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "If2": {
+      "main": [
+        [
+          {
+            "node": "Enviar Fallback1",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "Mensaje Candidato especifico",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Verificar correo": {
+      "main": [
+        [
+          {
+            "node": "Correo ya registrado?",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Requerimiento Vacantes": {
+      "main": [
+        [
+          {
+            "node": "Message a model",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Extract text OCR": {
+      "main": [
+        [
+          {
+            "node": "Requerimiento Vacantes",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Verificar PDF": {
+      "main": [
+        [
+          {
+            "node": "Extract text OCR",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "Requerimiento Vacantes",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Extraer PDF": {
+      "main": [
+        [
+          {
+            "node": "Extract from File",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Correo ya registrado?": {
+      "main": [
+        [
+          {
+            "node": "Extraer PDF",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "Respond to Webhook",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Normalizar": {
+      "main": [
+        [
+          {
+            "node": "Verificar correo",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Loop de candidatos extraidos en el sheets": {
+      "main": [
+        [
+          {
+            "node": "Mensaje pendientes PENDIENTE_REVISION",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Loop de candidatos extraidos en el sheets1": {
+      "main": [
+        [
+          {
+            "node": "Mensaje pendientes REVISION_PRIORITARIA",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Loop de candidatos extraidos en el sheets2": {
+      "main": [
+        [
+          {
+            "node": "Mensaje pendientes REVISION_MANUAL",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Buscar candidatos faltantes3": {
+      "main": [
+        [
+          {
+            "node": "Loop de candidatos extraidos en el sheets",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Buscar candidatos faltantes1": {
+      "main": [
+        [
+          {
+            "node": "Loop de candidatos extraidos en el sheets1",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Buscar candidatos faltantes2": {
+      "main": [
+        [
+          {
+            "node": "Loop de candidatos extraidos en el sheets2",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Recibir mensaje de telegram": {
+      "main": [
+        [
+          {
+            "node": "Seccionar mensaje",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Update row in sheet": {
+      "main": [
+        [
+          {
+            "node": "If",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "If": {
+      "main": [
+        [
+          {
+            "node": "si encontró",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "no encontró",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Actualizar estados sheets": {
+      "main": [
+        [
+          {
+            "node": "Update row in sheet",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Send a text message": {
+      "main": [
+        [
+          {
+            "node": "Respond OK - Postulacion",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "si encontró": {
+      "main": [
+        []
+      ]
+    }
+  },
+  "active": true,
+  "settings": {
+    "executionOrder": "v1",
+    "binaryMode": "separate",
+    "availableInMCP": false
+  },
+  "versionId": "edc3b51b-f40a-4368-9039-91e74af75f87",
+  "meta": {
+    "templateCredsSetupCompleted": true,
+    "instanceId": "f292bc8b2ea04d2a4b85abfdceeb26fbf0d5d47984e77a4a2589a3a61986daaf"
+  },
+  "nodeGroups": [],
+  "id": "4lsJOU3qziTzSxjD",
+  "tags": []
+}

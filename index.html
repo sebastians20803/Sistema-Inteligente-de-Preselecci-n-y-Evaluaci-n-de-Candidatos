@@ -61,7 +61,7 @@
           </div>
           <div class="field">
             <label for="telefono">Teléfono</label>
-            <input type="tel" id="telefono" name="telefono" placeholder="+57 300 000 0000" required />
+            <input type="tel" id="telefono" name="telefono" placeholder="+57 300 000 0000" required min="10" max="10" />
             <span class="field-error" data-for="telefono"></span>
           </div>
         </div>
@@ -81,7 +81,7 @@
           </div>
           <div class="field">
             <label for="experiencia">Años de experiencia</label>
-            <input type="number" id="experiencia" name="experiencia" min="0" max="50" placeholder="2" required />
+            <input type="number" id="experiencia" name="experiencia" min="0" max="50" limit="30" placeholder="2" required />
             <span class="field-error" data-for="experiencia"></span>
           </div>
         </div>
@@ -118,7 +118,7 @@
         </button>
 
         <div id="formStatus" class="form-status" role="status" aria-live="polite"></div>
-
+        
       </form>
     </div>
   </main>

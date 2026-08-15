@@ -5,7 +5,7 @@
    la "Production URL" (o la "Test URL" mientras pruebas).
    Ejemplo: https://tu-instancia.app.n8n.cloud/webhook/postulaciones
    ============================================================ */
-const N8N_WEBHOOK_URL = "https://sebastian20803.app.n8n.cloud/webhook-test/62c792b5-294e-4760-a292-2cc7835e01da";
+const N8N_WEBHOOK_URL = "https://sebastian20803.app.n8n.cloud/webhook/62c792b5-294e-4760-a292-2cc7835e01da";
 
 const MAX_FILE_MB = 5;
 let tecnologias = [];
@@ -52,6 +52,24 @@ document.addEventListener("DOMContentLoaded", () => {
   setupTagInput();
   setupFileDrop();
   setupFormSubmit();
+});
+const input = document.getElementById('experiencia');
+const inputTelefono = document.getElementById('telefono');
+
+inputTelefono.addEventListener('input', function() {
+  // Elimina cualquier carácter que no sea un número
+  this.value = this.value.replace(/\D/g, '');
+  
+  // Corta el texto si supera los 10 dígitos
+  if (this.value.length > 10) {
+    this.value = this.value.slice(0, 10);
+  }
+});
+
+input.addEventListener('input', function() {
+  if (this.value > 50) {
+    this.value = 50;
+  }
 });
 
 /* ---------- Tag input con búsqueda de tecnologías ---------- */
@@ -317,9 +335,33 @@ function setupFormSubmit() {
         body: formData
       });
 
-      if (!response.ok) throw new Error(`Respuesta del servidor: ${response.status}`);
+      // Intentamos leer el body como JSON venga o no un status 2xx,
+      // porque n8n manda el mensaje real ahí (ej: correo duplicado).
+      let data = null;
+      try {
+        data = await response.json();
+      } catch (_) {
+        // El body no era JSON válido; seguimos con data = null.
+      }
 
-      status.textContent = "¡Postulación enviada! Revisaremos tu perfil y te contactaremos pronto.";
+      if (!response.ok || (data && data.success === false)) {
+        // Caso específico: correo ya registrado.
+        if (data && data.error === "correo_duplicado") {
+          setError("correo", "Este correo ya está registrado.");
+          status.textContent = "Correo ya está registrado. Debes intentar nuevamente.";
+          status.classList.add("error");
+        } else {
+          status.textContent = (data && data.message)
+            ? data.message
+            : "No se pudo enviar la postulación. Intenta nuevamente en unos minutos.";
+          status.classList.add("error");
+        }
+        return;
+      }
+
+      status.textContent = (data && data.message)
+        ? data.message
+        : "¡Postulación enviada! Revisaremos tu perfil y te contactaremos pronto.";
       status.classList.add("success");
       form.reset();
       tecnologias = [];

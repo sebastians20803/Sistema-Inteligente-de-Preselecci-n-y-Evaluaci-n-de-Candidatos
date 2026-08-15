@@ -203,41 +203,92 @@ function renderChartScore(candidatos){
   });
 }
 
-/* ---------- render: cola de revisión (elemento firma) ---------- */
+/* ---------- render: lista de candidatos (paginada) ---------- */
+
+const PAGE_SIZE = 6;
+let candidatePage = 1;
 
 function renderPendingQueue(candidatos){
-  const pendientes = candidatos.filter(c => (c.estado || "").toUpperCase() === "PENDIENTE_REVISION");
-  document.getElementById('pendCount').textContent = `${pendientes.length} en espera`;
+  // Más recientes primero cuando hay fecha; si no, se respeta el orden de la hoja.
+  const ordenados = [...candidatos].sort((a, b) => {
+    const fa = Date.parse((a.fecha_postulacion || "").trim());
+    const fb = Date.parse((b.fecha_postulacion || "").trim());
+    if(isNaN(fa) && isNaN(fb)) return 0;
+    if(isNaN(fa)) return 1;
+    if(isNaN(fb)) return -1;
+    return fb - fa;
+  });
+
+  const totalPendientes = ordenados.filter(c => (c.estado || "").toUpperCase() === "PENDIENTE_REVISION").length;
+  document.getElementById('pendCount').textContent = `${ordenados.length} en total · ${totalPendientes} pendientes`;
 
   const container = document.getElementById('pendingQueue');
-  if(!pendientes.length){
-    container.innerHTML = `<p class="empty-state">No hay candidatos pendientes de revisión en este momento.</p>`;
+  const pager = document.getElementById('pendingPagination');
+
+  if(!ordenados.length){
+    container.innerHTML = `<p class="empty-state">Aún no hay candidatos registrados en la hoja.</p>`;
+    pager.innerHTML = "";
     return;
   }
 
-  container.innerHTML = pendientes.slice(0, 12).map(c => {
+  const totalPages = Math.max(1, Math.ceil(ordenados.length / PAGE_SIZE));
+  if(candidatePage > totalPages) candidatePage = totalPages;
+  if(candidatePage < 1) candidatePage = 1;
+
+  const start = (candidatePage - 1) * PAGE_SIZE;
+  const pageItems = ordenados.slice(start, start + PAGE_SIZE);
+
+  container.innerHTML = pageItems.map(c => {
     const bucket = scoreBucket(c.score_compatibilidad) || "media";
     const score = c.score_compatibilidad || "—";
+    const estado = (c.estado || "").toUpperCase();
     return `
       <div class="ticket">
         <div class="stamp ${bucket}">${score}</div>
         <div class="ticket-body">
           <p class="ticket-name">${c.nombre || "Sin nombre"}</p>
-          <p class="ticket-meta">${c.vacante || "—"}</p>
+          <p class="ticket-meta">${c.vacante || "—"} · ${estado || "SIN ESTADO"}</p>
         </div>
         <div class="ticket-id">${c.id_candidato || ""}</div>
       </div>
     `;
   }).join("");
+
+  renderPagination(pager, totalPages);
+}
+
+function renderPagination(pager, totalPages){
+  if(totalPages <= 1){
+    pager.innerHTML = "";
+    return;
+  }
+
+  pager.innerHTML = `
+    <button type="button" data-page="prev" ${candidatePage === 1 ? "disabled" : ""}>‹ Anterior</button>
+    <span class="pagination-status">Página ${candidatePage} de ${totalPages}</span>
+    <button type="button" data-page="next" ${candidatePage === totalPages ? "disabled" : ""}>Siguiente ›</button>
+  `;
+
+  pager.querySelector('[data-page="prev"]').addEventListener('click', () => {
+    candidatePage--;
+    renderPendingQueue(lastCandidatos);
+  });
+  pager.querySelector('[data-page="next"]').addEventListener('click', () => {
+    candidatePage++;
+    renderPendingQueue(lastCandidatos);
+  });
 }
 
 /* ---------- ciclo principal ---------- */
+
+let lastCandidatos = [];
 
 async function loadDashboard(){
   const dot = document.getElementById('statusDot');
   const statusText = document.getElementById('statusText');
   try{
     const candidatos = await fetchCandidatos();
+    lastCandidatos = candidatos;
     renderHero(candidatos);
     renderVacantes(candidatos);
     renderChartFechas(candidatos);
